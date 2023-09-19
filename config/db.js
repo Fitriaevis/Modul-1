@@ -5,7 +5,7 @@ let connection = mysql.createConnection({
     host: 'localhost',
     user: 'root',
     password: '',
-    database: 'db_01_express'
+    database: 'db_01_express;'
 });
 
 //membuat kondisi untuk melihat apakah koneksi apakah sudah berjalan
