@@ -7,6 +7,7 @@ const { body, validationResult } = require('express-validator');
 //import database
 const connection = require('../config/db');
 
+//modul 2
 router.get('/', function (req,res){
     connection.query('SELECT * FROM mahasiswa ORDER BY id_m DESC', function(err, rows){
         if (err) {
@@ -24,6 +25,7 @@ router.get('/', function (req,res){
     })
 });
 
+//modul 3
 router.post('/store',[
     //validation
     body('nama').notEmpty(),
@@ -39,7 +41,7 @@ router.post('/store',[
         nama: req.body.nama,
         nrp: req.body.nrp
     }
-    connection.query('INSERT INTO mahasiswa set ?', Data, function(err, rows){
+    connection.query('INSERT INTO mahasiswa SET ?', Data, function(err, rows){
         if (err) {
             return res.status(500).json({
                 status: false,
@@ -53,5 +55,35 @@ router.post('/store',[
         }
     })
 })
+
+//modul 4
+router.get('/(:id)', function (req, res){
+    let id = req.params.id;
+    
+    connection.query(`SELECT * FROM mahasiswa WHERE id_m = ${id}`, function(err, rows) {
+        if (err) {
+            return res.status(500).json({
+                status: false,
+                message: 'Server Error',
+            })
+        }
+        if (rows.length <= 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'Not Found',
+            })
+        }
+        else{
+            return res.status(200).json({
+                status: true,
+                message: 'Data Mahasiswa',
+                data: rows[0]
+            })
+        }
+    })
+})
+
+//modul 5
+
 
 module.exports = router;
