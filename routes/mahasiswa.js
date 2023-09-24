@@ -30,7 +30,7 @@ router.post('/store',[
     //validation
     body('nama').notEmpty(),
     body('nrp').notEmpty(),
-], (req, res) =>{
+    ], (req, res) =>{
     const error = validationResult(req);
     if (!error.isEmpty()) {
         return res.status(422).json({
@@ -109,6 +109,24 @@ router.patch('/update/:id', [
             return res.status(200).json({
                 status: true,
                 message: 'Update Success..!',
+            })
+        }
+    })
+})
+
+//modul 6
+router.delete('/delete/:id', function(req, res){
+    let id = req.params.id;
+    connection.query(`DELETE FROM mahasiswa WHERE id_m = ${id}`,  function(err, rows) {
+        if (err) {
+            return res.status(500).json({
+                status: false,
+                message: 'Server Error',
+            })
+        } else {
+            return res.status(200).json({
+                status: true,
+                message: 'Delete Success..!',
             })
         }
     })
