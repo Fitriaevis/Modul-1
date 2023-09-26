@@ -7,45 +7,39 @@ const { body, validationResult } = require('express-validator');
 //import database
 const connection = require('../config/db');
 
-//modul 2
-router.get('/', function (req,res){
-    connection.query('SELECT a.nama, b.nama_jurusan as jurusan ' +
-    ' from mahasiswa a join jurusan b ' +
-    ' on b.id_j=a.id_jurusan ORDER BY a.id_m DESC ', function(err, rows){
+//1: Menampilkan Semua Jurusan
+router.get('/', (req, res) => {
+    connection.query('SELECT * FROM jurusan', (err, rows) => {
         if (err) {
             return res.status(500).json({
                 status: false,
-                message: 'Server Failed',
-            })
-        }else{
+                message: 'Server Error',
+            });
+        } else {
             return res.status(200).json({
                 status: true,
-                message: 'Data Mahasiswa',
-                data: rows
-            })
+                message: 'Data Jurusan',
+                data: rows,
+            });
         }
-    })
+    });
 });
 
-//modul 3
+//2: Menambahkan Jurusan Baru
 router.post('/store', [
     // Validation
-    body('nama').notEmpty(),
-    body('nrp').notEmpty(),
-    body('jurusan').notEmpty()
+    body('nama_jurusan').notEmpty(),
 ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({
-            errors: errors.array()
+            errors: errors.array(),
         });
     }
     let data = {
-        nama: req.body.nama,
-        nrp: req.body.nrp,
-        id_jurusan: req.body.jurusan
+        nama_jurusan: req.body.nama_jurusan,
     };
-    connection.query('INSERT INTO mahasiswa SET ?', data, function (err, result) {
+    connection.query('INSERT INTO jurusan SET ?', data, (err, result) => {
         if (err) {
             return res.status(500).json({
                 status: false,
@@ -54,61 +48,53 @@ router.post('/store', [
         } else {
             return res.status(201).json({
                 status: true,
-                message: 'Data Mahasiswa berhasil ditambahkan',
-                insertedId: result.insertId
+                message: 'Jurusan berhasil ditambahkan',
+                insertedId: result.insertId,
             });
         }
     });
 });
 
-
-
-//modul 4
-router.get('/(:id)', function (req, res){
+//3: Menampilkan Jurusan Berdasarkan ID
+router.get('/:id', (req, res) => {
     let id = req.params.id;
-    
-    connection.query(`SELECT * FROM mahasiswa WHERE id_m = ${id}`, function(err, rows) {
+    connection.query('SELECT * FROM jurusan WHERE id_j = ?', [id], (err, rows) => {
         if (err) {
             return res.status(500).json({
                 status: false,
                 message: 'Server Error',
-            })
+            });
         }
         if (rows.length <= 0) {
             return res.status(404).json({
                 status: false,
-                message: 'Not Found',
-            })
-        }
-        else{
+                message: 'Jurusan tidak ditemukan',
+            });
+        } else {
             return res.status(200).json({
                 status: true,
-                message: 'Data Mahasiswa',
-                data: rows[0]
-            })
+                message: 'Data Jurusan',
+                data: rows[0],
+            });
         }
-    })
-})
+    });
+});
 
-//modul 5
+//4: Memperbarui Jurusan Berdasarkan ID
 router.patch('/update/:id', [
-    body('nama').notEmpty(),
-    body('nrp').notEmpty(),
-    body('jurusan').notEmpty() 
+    body('nama_jurusan').notEmpty(),
 ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({
-            errors: errors.array()
+            errors: errors.array(),
         });
     }
     let id = req.params.id;
     let data = {
-        nama: req.body.nama,
-        nrp: req.body.nrp,
-        id_jurusan: req.body.jurusan
+        nama_jurusan: req.body.nama_jurusan,
     };
-    connection.query('UPDATE mahasiswa SET ? WHERE id_m = ?', [data, id], function (err, result) {
+    connection.query('UPDATE jurusan SET ? WHERE id_j = ?', [data, id], (err, result) => {
         if (err) {
             return res.status(500).json({
                 status: false,
@@ -117,35 +103,38 @@ router.patch('/update/:id', [
         } else if (result.affectedRows === 0) {
             return res.status(404).json({
                 status: false,
-                message: 'Data Mahasiswa tidak ditemukan',
+                message: 'Jurusan tidak ditemukan',
             });
         } else {
             return res.status(200).json({
                 status: true,
-                message: 'Data Mahasiswa berhasil diperbarui',
+                message: 'Jurusan berhasil diperbarui',
             });
         }
     });
 });
 
-
-
-//modul 6
-router.delete('/delete/:id', function(req, res){
+//5: Menghapus Jurusan Berdasarkan ID
+router.delete('/delete/:id', (req, res) => {
     let id = req.params.id;
-    connection.query(`DELETE FROM mahasiswa WHERE id_m = ${id}`,  function(err, rows) {
+    connection.query('DELETE FROM jurusan WHERE id_j = ?', [id], (err, result) => {
         if (err) {
             return res.status(500).json({
                 status: false,
                 message: 'Server Error',
-            })
+            });
+        } else if (result.affectedRows === 0) {
+            return res.status(404).json({
+                status: false,
+                message: 'Jurusan tidak ditemukan',
+            });
         } else {
             return res.status(200).json({
                 status: true,
-                message: 'Delete Success..!',
-            })
+                message: 'Jurusan berhasil dihapus',
+            });
         }
-    })
-})
+    });
+});
 
 module.exports = router;

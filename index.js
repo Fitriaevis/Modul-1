@@ -11,9 +11,13 @@ app.use(bodyPs.urlencoded({ extended: false }));
 app.use(bodyPs.json());
 
 
-//import route posts
+//import route mahasiswa
 const mhsRouter = require('./routes/mahasiswa');
 app.use('/api/mhs', mhsRouter);
+
+//import route posts
+const jurusanRouter = require('./routes/jurusan');
+app.use('/api/jurusan', jurusanRouter);
 
 //listen express.js kedalam port 
 app.listen(port, () => {
