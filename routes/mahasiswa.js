@@ -23,10 +23,10 @@ const storage = multer.diskStorage({
     }
 })
 
-//modul 14
+
 const fileFilter = (req, file, cb) => {
     //mengecheck jenis file yang diizinkan (misalnya, hanya gambar JPEG atau PNG)
-    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png' || file.mimetype === 'application/pdf'){
         cb(null, true); //izinkan file
     } else {
         cb(new Error('Jenis file tidak diizinkan'), false); //Tolak file
@@ -35,7 +35,7 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({storage: storage, fileFilter: fileFilter })
 
-//modul 2
+
 router.get('/', function (req,res){
     connection.query('SELECT a.nama, b.nama_jurusan as jurusan ' +
     ' from mahasiswa a join jurusan b' +
@@ -55,7 +55,7 @@ router.get('/', function (req,res){
     })
 });
 
-//modul 3
+
 router.post('/create', [
     // Validation
     body('nama').notEmpty(),
@@ -91,7 +91,6 @@ router.post('/create', [
 
 
 
-//modul 4
 router.get('/(:id)', function (req, res){
     let id = req.params.id;
     
@@ -118,7 +117,7 @@ router.get('/(:id)', function (req, res){
     })
 })
 
-//modul 5
+
 router.patch('/update/:id', [
     body('nama').notEmpty(),
     body('nrp').notEmpty(),
