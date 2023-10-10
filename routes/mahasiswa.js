@@ -12,6 +12,29 @@ const { body, validationResult } = require('express-validator');
 //import database
 const connection = require('../config/db');
 
+
+const storage = multer.diskStorage({
+    destination: (req, file, cb)=> {
+        cb(null, 'public/images')
+    },
+    filename: (req, file, cb) => {
+        console.log(file)
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+})
+
+//modul 14
+const fileFilter = (req, file, cb) => {
+    //mengecheck jenis file yang diizinkan (misalnya, hanya gambar JPEG atau PNG)
+    if (file.mimetype === 'image/jpeg' || file.mimetype === 'image/png'){
+        cb(null, true); //izinkan file
+    } else {
+        cb(new Error('Jenis file tidak diizinkan'), false); //Tolak file
+    }
+};
+
+const upload = multer({storage: storage, fileFilter: fileFilter })
+
 //modul 2
 router.get('/', function (req,res){
     connection.query('SELECT a.nama, b.nama_jurusan as jurusan ' +
@@ -175,16 +198,7 @@ router.delete('/delete/:id', function(req, res){
 
 
 //modul 11
-const storage = multer.diskStorage({
-    destination: (req, file, cb)=> {
-        cb(null, 'public/images')
-    },
-    filename: (req, file, cb) => {
-        console.log(file)
-        cb(null, Date.now() + path.extname(file.originalname))
-    }
-})
-const upload = multer({storage: storage})
+
 
 router.post('/store', upload.single("gambar"), [
     //validation
@@ -277,5 +291,7 @@ router.patch('/updateGambar/:id', upload.single("gambar"), [
         });
     });
 });
+
+
 
 module.exports = router;
