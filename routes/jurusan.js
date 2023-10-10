@@ -28,18 +28,18 @@ router.get('/', (req, res) => {
 //2: Menambahkan Jurusan Baru
 router.post('/store', [
     // Validation
-    body('nama_jurusan').notEmpty(),
+    body('nama_jurusan').notEmpty()
 ], (req, res) => {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
         return res.status(422).json({
-            errors: errors.array(),
+            errors: errors.array()
         });
     }
     let data = {
-        nama_jurusan: req.body.nama_jurusan,
+        nama_jurusan: req.body.nama_jurusan
     };
-    connection.query('INSERT INTO jurusan SET ?', data, (err, result) => {
+    connection.query('INSERT INTO jurusan SET ?', data, function (err, result) {
         if (err) {
             return res.status(500).json({
                 status: false,
@@ -48,8 +48,8 @@ router.post('/store', [
         } else {
             return res.status(201).json({
                 status: true,
-                message: 'Jurusan berhasil ditambahkan',
-                insertedId: result.insertId,
+                message: 'Data Jurusan berhasil ditambahkan',
+                insertedId: result.insertId
             });
         }
     });
