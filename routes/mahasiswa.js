@@ -1,6 +1,8 @@
 const express = require('express');
 const router = express.Router();
 
+const fs = require('fs')
+
 const multer = require('multer')
 const path = require('path')
 
@@ -196,5 +198,62 @@ router.post('/store', upload.single("gambar"), [
     });
 });
 
+//modul 12
+router.patch('/updateGambar/:id', upload.single("gambar"), [
+    //validation
+    body('nama').notEmpty(),
+    body('nrp').notEmpty(),
+    body('id_jurusan').notEmpty()
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            errors: errors.array()
+        });
+    }
+    let id = req.params.id;
+        //lakukan check apakah ada file yang diunggah
+    let gambar = req.file ? req.file.filename : null;
+    connection.query(`SELECT * FROM  mahasiswa WHERE id_m = ${id}`, function (err, rows) {
+        if (err) {
+            return res.status(500).json({
+                status: false,
+                message: 'Server Error',
+            });
+        }if (rows.length ===0) {
+            return res.status(404).json({
+                status: false,
+                message: 'Data Mahasiswa tidak ditemukan',
+            });
+        }
+        const namaFileLama = rows[0].gambar;
+
+        //hapus file lama jika ada
+        if (namaFileLama && gambar) {
+            const pathFileLama = path.join(__dirname, '../public/images', namaFileLama);
+            fs.unlinkSync(pathFileLama);
+        }
+
+        let Data = {
+            nama: req.body.nama,
+            nrp: req.body.nrp,
+            id_jurusan: req.body.id_jurusan,
+            gambar : gambar
+        };
+        connection.query(`UPDATE mahasiswa SET ? WHERE id_m = ${id}`, Data, function (err, rows) {
+            if (err) {
+                return res.status(500).json({
+                    status: false,
+                    message: 'Server Error',
+                });
+            } else {
+                return res.status(200).json({
+                    status: true,
+                    message: 'Data Mahasiswa berhasil diperbarui',
+                });
+            }
+        });
+    });
+});
 
 module.exports = router;
