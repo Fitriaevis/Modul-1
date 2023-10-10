@@ -133,21 +133,43 @@ router.patch('/update/:id', [
     });
 });
 
-//modul 6
+//modul 6 ==> modul 13
 router.delete('/delete/:id', function(req, res){
     let id = req.params.id;
-    connection.query(`DELETE FROM mahasiswa WHERE id_m = ${id}`,  function(err, rows) {
+    
+    connection.query(`SELECT * FROM  mahasiswa WHERE id_m = ${id}`, function (err, rows) {
         if (err) {
             return res.status(500).json({
                 status: false,
                 message: 'Server Error',
-            })
-        } else {
-            return res.status(200).json({
-                status: true,
-                message: 'Delete Success..!',
-            })
+            });
+        }if (rows.length ===0) {
+            return res.status(404).json({
+                status: false,
+                message: 'Data Mahasiswa tidak ditemukan',
+            });
         }
+        const namaFileLama = rows[0].gambar;
+
+        //hapus file lama jika ada
+        if (namaFileLama) {
+            const pathFileLama = path.join(__dirname, '../public/images', namaFileLama);
+            fs.unlinkSync(pathFileLama);
+        }
+
+        connection.query(`DELETE FROM mahasiswa WHERE id_m = ${id}`,  function(err, rows) {
+            if (err) {
+                return res.status(500).json({
+                    status: false,
+                    message: 'Server Error',
+                })
+            } else {
+                return res.status(200).json({
+                    status: true,
+                    message: 'Delete Success..!',
+                })
+            }
+        })
     })
 })
 
