@@ -1,6 +1,9 @@
 const express = require('express');
 const router = express.Router();
 
+const multer = require('multer')
+const path = require('path')
+
 //import express-validator
 const { body, validationResult } = require('express-validator');
 
@@ -10,7 +13,7 @@ const connection = require('../config/db');
 //modul 2
 router.get('/', function (req,res){
     connection.query('SELECT a.nama, b.nama_jurusan as jurusan ' +
-    ' from mahasiswa a join jurusan b ' +
+    ' from mahasiswa a join jurusan b' +
     ' on b.id_j=a.id_jurusan ORDER BY a.id_m DESC ', function(err, rows){
         if (err) {
             return res.status(500).json({
@@ -28,7 +31,7 @@ router.get('/', function (req,res){
 });
 
 //modul 3
-router.post('/store', [
+router.post('/create', [
     // Validation
     body('nama').notEmpty(),
     body('nrp').notEmpty(),
@@ -128,8 +131,6 @@ router.patch('/update/:id', [
     });
 });
 
-
-
 //modul 6
 router.delete('/delete/:id', function(req, res){
     let id = req.params.id;
@@ -147,5 +148,53 @@ router.delete('/delete/:id', function(req, res){
         }
     })
 })
+
+
+//modul 11
+const storage = multer.diskStorage({
+    destination: (req, file, cb)=> {
+        cb(null, 'public/images')
+    },
+    filename: (req, file, cb) => {
+        console.log(file)
+        cb(null, Date.now() + path.extname(file.originalname))
+    }
+})
+const upload = multer({storage: storage})
+
+router.post('/store', upload.single("gambar"), [
+    //validation
+    body('nama').notEmpty(),
+    body('nrp').notEmpty(),
+    body('id_jurusan').notEmpty()
+], (req, res) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+        return res.status(422).json({
+            errors: errors.array()
+        });
+    }
+    let Data = {
+        nama: req.body.nama,
+        nrp: req.body.nrp,
+        id_jurusan: req.body.id_jurusan,
+        gambar: req.file.filename
+    }
+    connection.query('INSERT INTO mahasiswa SET ?', Data, function (err, result) {
+        if (err) {
+            return res.status(500).json({
+                status: false,
+                message: 'Server Error',
+            });
+        } else {
+            return res.status(201).json({
+                status: true,
+                message: 'Data Mahasiswa berhasil ditambahkan',
+                insertedId: result.insertId
+            });
+        }
+    });
+});
+
 
 module.exports = router;
