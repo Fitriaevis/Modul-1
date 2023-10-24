@@ -4,6 +4,9 @@ const port = 3000 // membuat variable dengan nama port yang isinya 3000
 const cors = require('cors')
 app.use(cors())
 
+const path = require('path')
+app.use('/static', express.static(path.join(__dirname, 'public/images')))
+
 
 // app.get('/', (req,res)=>{
 //     res.send('Halo Saya Fitria Evi Susana')

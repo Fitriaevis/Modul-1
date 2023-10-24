@@ -37,7 +37,7 @@ const upload = multer({storage: storage, fileFilter: fileFilter })
 
 
 router.get('/', function (req,res){
-    connection.query('SELECT a.nama, b.nama_jurusan as jurusan ' +
+    connection.query('SELECT a.id_jurusan, a.id_m AS id, a.nama, a.nrp, b.nama_jurusan as jurusan, a.gambar, a.swa_foto ' +
     ' from mahasiswa a join jurusan b' +
     ' on b.id_j=a.id_jurusan ORDER BY a.id_m DESC ', function(err, rows){
         if (err) {
@@ -165,10 +165,17 @@ router.patch('/update/:id', upload.fields([{ name: 'gambar', maxCount: 1 }, { na
         let Data = {
             nama: req.body.nama,
             nrp: req.body.nrp,
-            id_jurusan: req.body.id_jurusan,
-            gambar : gambar,
-            swa_foto: swa_foto
+            id_jurusan: req.body.id_jurusan
         };
+
+        if (gambar){
+            Data.gambar = gambar;
+        }
+
+        if (swa_foto){
+            Data.swa_foto = swa_foto;
+        }
+
         connection.query(`UPDATE mahasiswa SET ? WHERE id_m = ${id}`, Data, function (err, rows) {
             if (err) {
                 return res.status(500).json({
