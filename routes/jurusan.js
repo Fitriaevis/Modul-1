@@ -7,8 +7,10 @@ const { body, validationResult } = require('express-validator');
 //import database
 const connection = require('../config/db');
 
+const authenticateToken = require('../routes/auth/midleware/authenticateToken')
+
 //1: Menampilkan Semua Jurusan
-router.get('/', (req, res) => {
+router.get('/', authenticateToken, (req, res) => {
     connection.query('SELECT * FROM jurusan', (err, rows) => {
         if (err) {
             return res.status(500).json({
@@ -26,7 +28,7 @@ router.get('/', (req, res) => {
 });
 
 //2: Menambahkan Jurusan Baru
-router.post('/store', [
+router.post('/store', authenticateToken, [
     // Validation
     body('nama_jurusan').notEmpty()
 ], (req, res) => {
@@ -81,7 +83,7 @@ router.get('/:id', (req, res) => {
 });
 
 //4: Memperbarui Jurusan Berdasarkan ID
-router.patch('/update/:id', [
+router.patch('/update/:id', authenticateToken, [
     body('nama_jurusan').notEmpty(),
 ], (req, res) => {
     const errors = validationResult(req);
@@ -115,7 +117,7 @@ router.patch('/update/:id', [
 });
 
 //5: Menghapus Jurusan Berdasarkan ID
-router.delete('/delete/:id', (req, res) => {
+router.delete('/delete/:id', authenticateToken, (req, res) => {
     let id = req.params.id;
     connection.query('DELETE FROM jurusan WHERE id_j = ?', [id], (err, result) => {
         if (err) {
