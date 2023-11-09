@@ -12,7 +12,6 @@ const { body, validationResult } = require('express-validator');
 //import database
 const connection = require('../config/db');
 
-
 const storage = multer.diskStorage({
     destination: (req, file, cb)=> {
         cb(null, 'public/images')
@@ -22,7 +21,6 @@ const storage = multer.diskStorage({
         cb(null, Date.now() + path.extname(file.originalname))
     }
 })
-
 
 const fileFilter = (req, file, cb) => {
     //mengecheck jenis file yang diizinkan (misalnya, hanya gambar JPEG atau PNG)
@@ -35,8 +33,10 @@ const fileFilter = (req, file, cb) => {
 
 const upload = multer({storage: storage, fileFilter: fileFilter })
 
+const authenticateToken = require('../routes/auth/midleware/authenticateToken')
 
-router.get('/', function (req,res){
+
+router.get('/',authenticateToken, function (req,res){
     connection.query('SELECT a.id_jurusan, a.id_m AS id, a.nama, a.nrp, b.nama_jurusan as jurusan, a.gambar, a.swa_foto ' +
     ' from mahasiswa a join jurusan b' +
     ' on b.id_j=a.id_jurusan ORDER BY a.id_m DESC ', function(err, rows){
@@ -56,7 +56,7 @@ router.get('/', function (req,res){
 });
 
 
-router.post('/store', upload.fields([{name: 'gambar', maxCount: 1}, {name: 'swa_foto', maxCount: 1}]), [
+router.post('/store', authenticateToken, upload.fields([{name: 'gambar', maxCount: 1}, {name: 'swa_foto', maxCount: 1}]), [
     //validation
     body('nama').notEmpty(),
     body('nrp').notEmpty(),
@@ -120,7 +120,7 @@ router.get('/(:id)', function (req, res){
 })
 
 
-router.patch('/update/:id', upload.fields([{ name: 'gambar', maxCount: 1 }, { name: 'swa_foto', maxCount: 1 }]), [
+router.patch('/update/:id', authenticateToken, upload.fields([{ name: 'gambar', maxCount: 1 }, { name: 'swa_foto', maxCount: 1 }]), [
     //validation
     body('nama').notEmpty(),
     body('nrp').notEmpty(),
@@ -193,7 +193,7 @@ router.patch('/update/:id', upload.fields([{ name: 'gambar', maxCount: 1 }, { na
 });
 
 
-router.delete('/delete/:id', function(req, res){
+router.delete('/delete/:id', authenticateToken, function(req, res){
     let id = req.params.id;
     connection.query(`SELECT * FROM  mahasiswa WHERE id_m = ${id}`, function (err, rows) {
         if (err) {

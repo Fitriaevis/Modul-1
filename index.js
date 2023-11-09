@@ -25,7 +25,12 @@ app.use('/api/mhs', mhsRouter);
 const jurusanRouter = require('./routes/jurusan');
 app.use('/api/jurusan', jurusanRouter);
 
+//import route Register & Login
+const auth = require('./routes/auth/auth');
+app.use('/api/auth', auth);
+
+
 //listen express.js kedalam port 
 app.listen(port, () => {
-    console.log(`aplikasi akan berjalan di http://localhost${port}`)
+    console.log(`aplikasi akan berjalan di http://localhost: ${port}`)
 })
